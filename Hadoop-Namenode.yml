@@ -1,0 +1,50 @@
+- hosts: Namenode
+  tasks:
+  - name: Copy JDK
+    copy:
+      src: /root/jdk-8u171-linux-x64.rpm
+      dest: /root
+
+  - name: Copy Hadoop
+    copy:
+      src: /root/hadoop-1.2.1-1.x86_64.rpm
+      dest: /root
+
+  - name: Install JDK
+    command: rpm -i jdk-8u171-linux-x64.rpm --force
+
+  - name: Install Hadoop
+    command: rpm -ivh hadoop-1.2.1-1.x86_64.rpm --force
+
+  - name: Create namenode directory
+    file:
+      path: /namenode
+      state: directory
+
+  - name: Configure hdfs-site.xml file
+    template:
+      src: Namenode-hdfs-site.xml
+      dest: /etc/hadoop/hdfs-site.xml
+
+  - name: Configure core-site.xml file
+    template:
+      src: Namenode-core-site.xml
+      dest: /etc/hadoop/core-site.xml
+
+  - name: Format namenode
+    shell: echo Y | hadoop namenode -format
+
+  - name: permit traffic in default zone on port 9001/tcp 
+    ansible.posix.firewalld:
+      port: 9001/tcp
+      permanent: yes
+      state: enabled
+      
+  - name: Start namenode
+    command: hadoop-daemon.sh start namenode
+
+
+
+
+
+  
